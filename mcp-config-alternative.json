@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "word-server": {
+      "command": "python3",
+      "args": [
+        "-m", "word_mcp_server"
+      ],
+      "cwd": "/Users/harrismusungu/Desktop/git/Word-MCP-Server",
+      "env": {
+        "PYTHONPATH": "/Users/harrismusungu/Desktop/git/Word-MCP-Server/venv-simple/lib/python3.13/site-packages",
+        "PATH": "/Users/harrismusungu/Desktop/git/Word-MCP-Server/venv-simple/bin:/usr/bin:/bin"
+      }
+    }
+  }
+}

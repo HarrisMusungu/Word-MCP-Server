@@ -1,4 +1,2 @@
-fastmcp
-python-docx
-msoffcrypto-tool
-docx2pdf
+fastmcp>=2.8.1
+python-docx>=1.1.2
