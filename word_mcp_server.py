@@ -114,6 +114,37 @@ def list_documents(directory: str = ".") -> str:
     except Exception as e:
         return f"Error listing documents: {str(e)}"
 
+@mcp.tool()
+def copy_document(source_filename: str, target_filename: str) -> str:
+    """Copy a Word document to create a new version while preserving all formatting.
+    
+    Args:
+        source_filename: Path to the source Word document to copy
+        target_filename: Path for the new copied document
+    
+    Returns:
+        Success or error message
+    """
+    source_filename = ensure_docx_extension(source_filename)
+    target_filename = ensure_docx_extension(target_filename)
+    
+    if not check_file_exists(source_filename):
+        return f"Error: Source document '{source_filename}' does not exist"
+    
+    if check_file_exists(target_filename):
+        return f"Error: Target document '{target_filename}' already exists"
+    
+    try:
+        # Load the source document
+        source_doc = Document(source_filename)
+        
+        # Save it with the new filename (this preserves all formatting, styles, etc.)
+        source_doc.save(target_filename)
+        
+        return f"Document copied successfully from '{source_filename}' to '{target_filename}'"
+    except Exception as e:
+        return f"Error copying document: {str(e)}"
+
 # WRITE OPERATIONS
 
 @mcp.tool()
@@ -260,6 +291,7 @@ def main():
     print("Starting Simple Word Document MCP Server...")
     print("Available tools:")
     print("  READ: read_document, get_document_info, list_documents")
+    print("  COPY: copy_document")
     print("  WRITE: create_document, write_text, add_heading, replace_text")
     print()
     
