@@ -6,6 +6,7 @@ Provides only essential Read and Write operations for Word documents.
 
 import os
 import json
+import subprocess
 from typing import Optional, List
 from docx import Document
 from fastmcp import FastMCP
@@ -286,13 +287,71 @@ def replace_text(filename: str, find_text: str, replace_text: str) -> str:
     except Exception as e:
         return f"Error replacing text: {str(e)}"
 
+@ mcp.tool()
+def export_to_pdf(source_filename: str, target_filename: Optional[str] = None) -> str:
+    """Export a Word document to PDF format.
+    
+    Args:
+        source_filename: Path to the source Word document
+        target_filename: Optional path for the PDF output (defaults to same name with .pdf extension)
+    
+    Returns:
+        Success or error message
+    
+    Note:
+        Requires LibreOffice to be installed and available in PATH as 'soffice'
+    """
+    source_path = ensure_docx_extension(source_filename)
+    if not check_file_exists(source_path):
+        return f"Error: Source document '{source_path}' does not exist"
+    
+    # Determine target path
+    if target_filename is None:
+        target_path = source_path.replace('.docx', '.pdf')
+    else:
+        target_path = target_filename
+        if not target_path.lower().endswith('.pdf'):
+            target_path += '.pdf'
+    
+    output_dir = os.path.dirname(target_path) or '.'
+    
+    try:
+        # Run LibreOffice conversion
+        cmd = [
+            'soffice',
+            '--headless',
+            '--convert-to', 'pdf',
+            source_path,
+            '--outdir', output_dir
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            error_msg = result.stderr.strip() or result.stdout.strip()
+            return f"Conversion failed: {error_msg}"
+        
+        # Determine the converted filename (same base as source)
+        source_base = os.path.splitext(os.path.basename(source_path))[0]
+        converted_path = os.path.join(output_dir, f"{source_base}.pdf")
+        
+        # If target_path is different, rename the file
+        if converted_path != target_path:
+            if os.path.exists(target_path):
+                return f"Error: Target file '{target_path}' already exists"
+            os.rename(converted_path, target_path)
+        
+        return f"Document converted to PDF: '{target_path}'"
+    
+    except Exception as e:
+        return f"Error during PDF conversion: {str(e)}"
+
 def main():
     """Main entry point for the server."""
     print("Starting Simple Word Document MCP Server...")
     print("Available tools:")
     print("  READ: read_document, get_document_info, list_documents")
     print("  COPY: copy_document")
-    print("  WRITE: create_document, write_text, add_heading, replace_text")
+    print("  WRITE: create_document, write_text, add_heading, replace_text, export_to_pdf")
     print()
     
     try:
